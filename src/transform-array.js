@@ -19,44 +19,38 @@ function transform(arr) {
   }
 
   const result = [];
-  const discarded = new Set();
-  const doubled = new Set();
 
   for (let i = 0; i < arr.length; i++) {
-    const value = arr[i];
+    const item = arr[i];
 
-    if (value === "--discard-prev") {
-      if (i > 0) {
-        discarded.add(i - 1);
-      }
-    } else if (value === "--discard-next") {
-      if (i + 1 < arr.length) {
-        discarded.add(i + 1);
-      }
-    } else if (value === "--double-prev") {
-      if (i > 0) {
-        doubled.add(i - 1);
-      }
-    } else if (value === "--double-next") {
-      if (i + 1 < arr.length) {
-        doubled.add(i + 1);
-      }
-    }
-  }
+    switch (item) {
+      case "--discard-next":
+        if (i + 1 < arr.length) {
+          i++; // пропускаем следующий элемент
+          // команда, направленная назад, на отброшенный элемент не действует
+          if (
+            arr[i + 1] === "--discard-prev" ||
+            arr[i + 1] === "--double-prev"
+          ) {
+            i++;
+          }
+        }
+        break;
 
-  for (let i = 0; i < arr.length; i++) {
-    if (typeof arr[i] === "string" && arr[i].startsWith("--")) {
-      continue;
-    }
+      case "--discard-prev":
+        if (i > 0) result.pop();
+        break;
 
-    if (discarded.has(i)) {
-      continue;
-    }
+      case "--double-next":
+        if (i + 1 < arr.length) result.push(arr[i + 1]);
+        break;
 
-    result.push(arr[i]);
+      case "--double-prev":
+        if (i > 0) result.push(arr[i - 1]);
+        break;
 
-    if (doubled.has(i)) {
-      result.push(arr[i]);
+      default:
+        result.push(item);
     }
   }
 
